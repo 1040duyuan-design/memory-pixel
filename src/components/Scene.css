@@ -1,0 +1,62 @@
+.scene {
+  width: 100%;
+  min-height: 60vh;
+  border-radius: 16px;
+  padding: 24px;
+  box-sizing: border-box;
+  position: relative;
+  transition: background-color 0.5s, color 0.5s;
+}
+
+/* 时间段背景 */
+.scene-morning {
+  background: linear-gradient(to bottom, #87CEEB 0%, #b0e0e6 100%);
+  color: #2c3e50;
+}
+
+.scene-afternoon {
+  background: linear-gradient(to bottom, #87CEEB 0%, #98d8c8 100%);
+  color: #2c3e50;
+}
+
+.scene-evening {
+  background: linear-gradient(to bottom, #ff7e5f 0%, #feb47b 100%);
+  color: #fff;
+}
+
+.scene-night {
+  background: linear-gradient(to bottom, #2c3e50 0%, #000000 100%);
+  color: #ecf0f1;
+}
+
+.scene-dawn {
+  background: linear-gradient(to bottom, #4da0b0 0%, #d39d37 100%);
+  color: #fff;
+}
+
+/* 天气影响 */
+.scene-rainy {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), 
+                    var(--gradient);
+}
+
+.scene-snowy {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)), 
+                    var(--gradient);
+}
+
+.scene-content {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  min-height: 50vh;
+  padding-bottom: 40px;
+}
+
+.scene-footer {
+  position: absolute;
+  bottom: 12px;
+  right: 24px;
+  font-size: 14px;
+  opacity: 0.8;
+}

@@ -1,0 +1,35 @@
+.pixel-character-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.pixel-character-container:hover {
+  transform: scale(1.05);
+}
+
+.pixel-art {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+.character-info {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.character-info h3 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.current-action {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+  font-style: italic;
+}

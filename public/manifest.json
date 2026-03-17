@@ -1,0 +1,16 @@
+{
+  "name": "记忆像素",
+  "short_name": "记忆像素",
+  "description": "把思念放进像素里，让亲人一直陪伴",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f7fa",
+  "theme_color": "#4a6fa5",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3069/3069189.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
