@@ -3,11 +3,27 @@
   flex-direction: column;
   align-items: center;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: left 1s ease-in-out, top 1s ease-in-out, transform 0.2s;
+  transform-origin: center bottom;
+  width: 80px;
 }
 
 .pixel-character-container:hover {
   transform: scale(1.05);
+}
+
+/* 走路动画 */
+.pixel-character-container.walking {
+  animation: walk-bob 1s infinite ease-in-out;
+}
+
+@keyframes walk-bob {
+  0%, 100% {
+    transform: translateY(0px) scale(1.05);
+  }
+  50% {
+    transform: translateY(-3px) scale(1.05);
+  }
 }
 
 .pixel-art {
@@ -17,8 +33,12 @@
 }
 
 .character-info {
-  margin-top: 12px;
+  margin-top: 4px;
   text-align: center;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 2px 8px;
+  border-radius: 8px;
+  white-space: nowrap;
 }
 
 .character-info h3 {
@@ -29,7 +49,7 @@
 
 .current-action {
   margin: 0;
-  font-size: 14px;
+  font-size: 12px;
   color: #666;
   font-style: italic;
 }

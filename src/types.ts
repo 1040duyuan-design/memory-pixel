@@ -33,19 +33,20 @@ export interface AutonomousAction {
   activity: string;
   duration: number; // 持续时间（毫秒）
   startTime: number;
+  targetPosition?: { x: number; y: number }; // 移动目标位置
+  startPosition?: { x: number; y: number }; // 起始位置
 }
 
 // 行为类型
 export type ActionType = 
-  | 'reading'      // 读书看报
-  | 'watching-tv'  // 看电视
-  | 'walking'      // 散步
-  | 'cooking'      // 做饭
-  | 'gardening'    // 浇花种花
-  | 'napping'      // 打盹
-  | 'petting'      // 撸猫/遛狗
-  | 'drinking-tea' // 喝茶
-  | 'cleaning'     // 打扫
+  | 'reading'      // 在沙发读书看报
+  | 'watching-tv' // 坐在沙发看电视
+  | 'walking'      // 在客厅散步
+  | 'standing'     // 站在窗边
+  | 'watering'     // 给绿植浇水
+  | 'napping'      // 在沙发打盹
+  | 'cleaning'     // 打扫客厅
+  | 'sitting-tea'  // 在茶几喝茶
   | 'sitting'      // 坐着发呆
   | 'photo-album'; // 翻看相册
 
@@ -54,6 +55,12 @@ export interface SceneState {
   timeOfDay: 'dawn' | 'morning' | 'afternoon' | 'evening' | 'night';
   weather: 'sunny' | 'cloudy' | 'rainy' | 'snowy';
   season: 'spring' | 'summer' | 'autumn' | 'winter';
+}
+
+// 人物位置
+export interface CharacterPosition {
+  x: number;
+  y: number;
 }
 
 // 对话消息
