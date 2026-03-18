@@ -93,3 +93,22 @@
 .scene-night .scene-footer {
   background: rgba(0, 0, 0, 0.5);
 }
+
+/* 雨滴动画 */
+.rain .rain-drop {
+  animation: rain-fall 1s linear infinite;
+}
+
+@keyframes rain-fall {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(320px);
+    opacity: 0;
+  }
+}

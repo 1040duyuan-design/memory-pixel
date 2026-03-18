@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { PixelCharacter, AutonomousAction, SceneState, CharacterPosition } from './types';
 import { getCharacter } from './utils/storage';
 import { randomNextAction, isActionFinished } from './utils/actionManager';
@@ -14,11 +14,11 @@ const actionPositions: Record<string, CharacterPosition> = {
   'reading':      { x: 320, y: 200 },  // 沙发左边
   'watching-tv':  { x: 400, y: 220 },  // 沙发中间
   'walking':      { x: 200, y: 340 },  // 客厅散步位置
-  'standing':     { x: 100, y: 160 },  // 窗边
-  'watering':     { x: 680, y: 280 },  // 绿植旁边
-  'napping':      { x: 340, y: 200 },  // 沙发睡觉
-  'cleaning':     { x: 200, y: 340 },  // 打扫
-  'sitting-tea':  { x: 400, y: 280 },  // 茶几旁边
+  'standing':     { x: 120, y: 160 },  // 窗边
+  'watering':     { x: 660, y: 280 },  // 绿植旁边
+  'napping':      { x: 360, y: 200 },  // 沙发睡觉
+  'cleaning':     { x: 250, y: 340 },  // 打扫
+  'sitting-tea': { x: 420, y: 280 },  // 茶几旁边
   'sitting':      { x: 380, y: 220 },  // 沙发发呆
   'photo-album':  { x: 340, y: 240 },  // 沙发翻相册
 };
@@ -26,10 +26,45 @@ const actionPositions: Record<string, CharacterPosition> = {
 function App() {
   const [character, setCharacter] = useState<PixelCharacter | null>(null);
   const [currentAction, setCurrentAction] = useState<AutonomousAction | null>(null);
-  const [characterPosition, setCharacterPosition] = useState<CharacterPosition>({ x: 400, y: 280 });
+  const [currentPosition, setCurrentPosition] = useState<CharacterPosition>({ x: 400, y: 280 });
+  const [_, setTargetPosition] = useState<CharacterPosition | null>(null);
   const [sceneState, setSceneState] = useState<SceneState>(getInitialSceneState());
   const [showChat, setShowChat] = useState(false);
   const [activeTab, setActiveTab] = useState<'home' | 'memories'>('home');
+  
+  const animationRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number>(0);
+
+  // 平滑插值动画
+  const animatePosition = (start: CharacterPosition, end: CharacterPosition, duration: number = 1000) => {
+    startTimeRef.current = performance.now();
+    setTargetPosition(end);
+
+    const step = () => {
+      const elapsed = performance.now() - startTimeRef.current;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // 缓动函数
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      
+      const newX = start.x + (end.x - start.x) * easeProgress;
+      const newY = start.y + (end.y - start.y) * easeProgress;
+      
+      setCurrentPosition({ x: newX, y: newY });
+      
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(step);
+      } else {
+        setCurrentPosition(end);
+        setTargetPosition(null);
+      }
+    };
+    
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+    animationRef.current = requestAnimationFrame(step);
+  };
 
   useEffect(() => {
     const saved = getCharacter();
@@ -41,9 +76,16 @@ function App() {
       setCurrentAction(action);
       // 设置对应位置
       if (action.type && actionPositions[action.type]) {
-        setCharacterPosition(actionPositions[action.type]);
+        setCurrentPosition(actionPositions[action.type]);
+        setTargetPosition(null);
       }
     }
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
   }, []);
 
   // 更新场景状态（时间、天气、季节）
@@ -63,15 +105,17 @@ function App() {
       if (isActionFinished(currentAction)) {
         const newAction = randomNextAction(character);
         setCurrentAction(newAction);
-        // 移动到对应位置
+        
+        // 平滑移动到对应位置
         if (newAction.type && actionPositions[newAction.type]) {
-          setCharacterPosition(actionPositions[newAction.type]);
+          const target = actionPositions[newAction.type];
+          animatePosition(currentPosition, target, 1200);
         }
       }
     }, 30000); // 每30秒检查一次
 
     return () => clearInterval(timer);
-  }, [character, currentAction]);
+  }, [character, currentAction, currentPosition]);
 
   function getInitialSceneState(): SceneState {
     const now = new Date();
@@ -91,8 +135,16 @@ function App() {
     else if (month >= 9 && month <= 11) season = 'autumn';
     else season = 'winter';
 
-    // 随机天气，这里简单处理
-    const weather: SceneState['weather'] = ['sunny', 'sunny', 'sunny', 'cloudy', 'rainy'][Math.floor(Math.random() * 5)] as any;
+    // 随机天气，根据季节调整概率
+    const weathers: SceneState['weather'][] = ['sunny', 'sunny', 'sunny', 'cloudy', 'rainy'];
+    if (season === 'winter') {
+      weathers.push('snowy');
+      weathers.push('cloudy');
+    } else if (season === 'summer') {
+      weathers.push('sunny');
+      weathers.push('sunny');
+    }
+    const weather: SceneState['weather'] = weathers[Math.floor(Math.random() * weathers.length)];
 
     return { timeOfDay, weather, season };
   }
@@ -100,6 +152,7 @@ function App() {
   function updateSceneState(prev: SceneState): SceneState {
     const now = new Date();
     const hour = now.getHours();
+    const month = now.getMonth() + 1;
     
     let timeOfDay: SceneState['timeOfDay'] = prev.timeOfDay;
     if (hour < 6) timeOfDay = 'night';
@@ -108,7 +161,31 @@ function App() {
     else if (hour < 20) timeOfDay = 'evening';
     else timeOfDay = 'night';
 
-    return { ...prev, timeOfDay };
+    let season: SceneState['season'] = prev.season;
+    if (month >= 3 && month <= 5) season = 'spring';
+    else if (month >= 6 && month <= 8) season = 'summer';
+    else if (month >= 9 && month <= 11) season = 'autumn';
+    else season = 'winter';
+
+    // 10% 概率随机改变天气
+    let weather: SceneState['weather'] = prev.weather;
+    if (Math.random() < 0.1) {
+      const weathers: SceneState['weather'][] = ['sunny', 'cloudy', 'rainy', 'snowy'];
+      // 根据季节调整概率
+      if (season === 'winter') {
+        // 冬天更容易下雪
+        weathers.push('snowy');
+        weathers.push('cloudy');
+      } else if (season === 'summer') {
+        weathers.push('sunny');
+        weathers.push('sunny');
+      } else if (season === 'spring') {
+        weathers.push('rainy');
+      }
+      weather = weathers[Math.floor(Math.random() * weathers.length)];
+    }
+
+    return { ...prev, timeOfDay, season, weather };
   }
 
   function handleCharacterCreated(char: PixelCharacter) {
@@ -116,7 +193,8 @@ function App() {
     const action = randomNextAction(char);
     setCurrentAction(action);
     if (action.type && actionPositions[action.type]) {
-      setCharacterPosition(actionPositions[action.type]);
+      setCurrentPosition(actionPositions[action.type]);
+      setTargetPosition(null);
     }
   }
 
@@ -154,7 +232,7 @@ function App() {
             <PixelCharacterComponent 
               character={character} 
               currentAction={currentAction}
-              position={characterPosition}
+              position={currentPosition}
               onClick={handleCharacterClick}
             />
           </Scene>
